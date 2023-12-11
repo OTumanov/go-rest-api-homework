@@ -1,13 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
 
-// Task ...
 type Task struct {
 	ID           string   `json:"id"`
 	Description  string   `json:"description"`
@@ -39,14 +39,25 @@ var tasks = map[string]Task{
 	},
 }
 
-// Ниже напишите обработчики для каждого эндпоинта
-// ...
+func getTaskss(w http.ResponseWriter, r *http.Request) {
+	resp, err := json.Marshal(tasks)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(resp)
+	if err != nil {
+		return
+	}
+}
 
 func main() {
 	r := chi.NewRouter()
 
-	// здесь регистрируйте ваши обработчики
-	// ...
+	r.Get("/tasks", getTaskss)
 
 	if err := http.ListenAndServe(":8080", r); err != nil {
 		fmt.Printf("Ошибка при запуске сервера: %s", err.Error())
